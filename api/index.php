@@ -6,18 +6,20 @@ $ch = curl_init(API_URL);
 
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_CAINFO => "C:\\php-8.5.11\\extras\\ssl\\cacert.pem",
+    CURLOPT_FOLLOWLOCATION => true,
 ]);
 
 $result = curl_exec($ch);
 
 if ($result === false) {
+    http_response_code(500);
     die("ERROR CURL: " . curl_error($ch));
 }
 
 $data = json_decode($result, true);
 
 if ($data === null) {
+    http_response_code(500);
     die("ERROR JSON: " . json_last_error_msg());
 }
 ?>
@@ -61,36 +63,35 @@ if ($data === null) {
 </head>
 
 <body>
-
     <main>
         <h1>Próxima producción de Marvel</h1>
 
         <article>
-            <h2><?= $data["title"] ?></h2>
+            <h2><?= htmlspecialchars($data["title"] ?? "Sin título") ?></h2>
 
             <img
-                src="<?= $data["poster_url"] ?>"
-                alt="Póster de <?= $data["title"] ?>"
+                src="<?= htmlspecialchars($data["poster_url"] ?? "") ?>"
+                alt="Póster de <?= htmlspecialchars($data["title"] ?? "la producción") ?>"
                 width="300"
             >
 
             <p>
-                <?= $data["overview"] ?>
+                <?= htmlspecialchars($data["overview"] ?? "") ?>
             </p>
 
             <p>
                 <strong>Fecha de estreno:</strong>
-                <?= $data["release_date"] ?>
+                <?= htmlspecialchars($data["release_date"] ?? "") ?>
             </p>
 
             <p>
                 <strong>Tipo:</strong>
-                <?= $data["type"] ?>
+                <?= htmlspecialchars($data["type"] ?? "") ?>
             </p>
 
             <p>
                 <strong>Faltan:</strong>
-                <?= $data["days_until"] ?> días
+                <?= htmlspecialchars((string)($data["days_until"] ?? 0)) ?> días
             </p>
         </article>
     </main>
